@@ -7,6 +7,7 @@ FILE_VERSION="20201120"
 import json
 from datetime import datetime
 import re
+import sys
 
 def cleanhtml(raw_html):
     cleanr = re.compile('<.*?>')
@@ -31,34 +32,56 @@ for s in data.get('sessions', []):
         sessions[name] = [ s ]
 
 # Now we have sessions aggregated by name.
-# Start generating MD output
-with open("./output/%s.md" % FILE_VERSION, 'w') as o:
-    o.write("# re:Invent 2020 - Session List\n\n")
-    for name in sorted(sessions.keys()):
-        s=sessions[name]
-        o.write("## {}\n".format(name))
-        o.write("**TAGS**: {}\n".format(s[0]['tags']))
-        o.write("\n{}\n".format(cleanhtml(s[0]['description'])))
-        o.write("\n")
-        o.write("| Start (UTC) | End (UTC) | Location | G Calendar |\n")
-        o.write("|-------------|-----------|----------|------------|\n")
-        for det in s:
-            tstart = datetime.fromtimestamp(det['schedulingData']['start']['timestamp'])
-            tend = datetime.fromtimestamp(det['schedulingData']['end']['timestamp'])
-            tzstart = tstart.strftime("%Y%m%dT%H%M%SZ")
-            tzend = tend.strftime("%Y%m%dT%H%M%SZ")
-            calname = "re:Invent 2020 - {}".format(name).replace(" ", "+")
-            location = "https://virtual.awsevents.com/media/{}".format(det['id'])
-            location_link = "[{}]({})".format(det['id'], location)
-            url = "https://www.google.com/calendar/render?action=TEMPLATE&text={}&location={}&dates={}%2F{}".format(calname, location, tzstart, tzend)
-            link = "[G_CAL]({})".format(url)
-            o.write("| {} | {} | {} | {} |\n".format(
-                tstart,
-                tend,
-                location_link,
-                link)
-            )
+# Split in multiple pages (500 items per page).
+# it seems we need to split the output in parts, otherwise github is not able to render it as preview ;)
+divide_by = 500
 
+session_names = sorted(sessions.keys())
+
+# Initialize array
+topics_len = len(session_names)
+page_range = (topics_len // divide_by) + 1
+sess_split = []
+for i in range(page_range):
+    sess_split.append({})
+
+i = 0
+for name in session_names:
+    pg_idx = i // 500
+    sess_split[pg_idx][name] = sessions[name]
+    i = i + 1
+
+i = 0
+for sessions in sess_split:
+    # Start generating MD output
+    fn = "./output/%s_%s.md" % (FILE_VERSION, str(i))
+    with open(fn, 'w') as o:
+        o.write("# re:Invent 2020 - Session List\n\n")
+        for name in sorted(sessions.keys()):
+            s=sessions[name]
+            o.write("## {}\n".format(name))
+            o.write("**TAGS**: {}\n".format(s[0]['tags']))
+            o.write("\n{}\n".format(cleanhtml(s[0]['description'])))
+            o.write("\n")
+            o.write("| Start (UTC) | End (UTC) | Location | G Calendar |\n")
+            o.write("|-------------|-----------|----------|------------|\n")
+            for det in s:
+                tstart = datetime.fromtimestamp(det['schedulingData']['start']['timestamp'])
+                tend = datetime.fromtimestamp(det['schedulingData']['end']['timestamp'])
+                tzstart = tstart.strftime("%Y%m%dT%H%M%SZ")
+                tzend = tend.strftime("%Y%m%dT%H%M%SZ")
+                calname = "re:Invent 2020 - {}".format(name).replace(" ", "+")
+                location = "https://virtual.awsevents.com/media/{}".format(det['id'])
+                location_link = "[{}]({})".format(det['id'], location)
+                url = "https://www.google.com/calendar/render?action=TEMPLATE&text={}&location={}&dates={}%2F{}".format(calname, location, tzstart, tzend)
+                link = "[G_CAL]({})".format(url)
+                o.write("| {} | {} | {} | {} |\n".format(
+                    tstart,
+                    tend,
+                    location_link,
+                    link)
+                )
+    i = i + 1
 
 
 """

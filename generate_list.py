@@ -5,6 +5,12 @@ FILE_VERSION="20201120"
 
 # Real code for real men starts here.
 import json
+import re
+
+def cleanhtml(raw_html):
+    cleanr = re.compile('<.*?>')
+    cleantext = re.sub(cleanr, '', raw_html)
+    return cleantext
 
 data = {}
 
@@ -31,7 +37,7 @@ with open("./output/%s.md" % FILE_VERSION, 'w') as o:
         s=sessions[name]
         o.write("## {}\n".format(name))
         o.write("**TAGS**: {}\n".format(s[0]['tags']))
-        o.write("```\n{}\n```\n".format(s[0]['description']))
+        o.write("{}\n".format(cleanhtml(s[0]['description'])))
         o.write("\n")
 
 

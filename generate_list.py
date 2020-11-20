@@ -40,19 +40,22 @@ with open("./output/%s.md" % FILE_VERSION, 'w') as o:
         o.write("**TAGS**: {}\n".format(s[0]['tags']))
         o.write("\n{}\n".format(cleanhtml(s[0]['description'])))
         o.write("\n")
-        o.write("| Start (UTC) | End (UTC) | G Calendar |\n")
-        o.write("|-------------|-----------|------------|\n")
+        o.write("| Start (UTC) | End (UTC) | Location | G Calendar |\n")
+        o.write("|-------------|-----------|----------|------------|\n")
         for det in s:
             tstart = datetime.fromtimestamp(det['schedulingData']['start']['timestamp'])
             tend = datetime.fromtimestamp(det['schedulingData']['end']['timestamp'])
             tzstart = tstart.strftime("%Y%m%dT%H%M%SZ")
             tzend = tend.strftime("%Y%m%dT%H%M%SZ")
             calname = "re:Invent 2020 - {}".format(name).replace(" ", "+")
-            url = "https://www.google.com/calendar/render?action=TEMPLATE&text={}&dates={}%2F{}".format(calname, tzstart, tzend)
+            location = "https://virtual.awsevents.com/media/{}".format(det['id'])
+            location_link = "[{}]({})".format(det['id'], location)
+            url = "https://www.google.com/calendar/render?action=TEMPLATE&text={}&location={}&dates={}%2F{}".format(calname, location, tzstart, tzend)
             link = "[G_CAL]({})".format(url)
-            o.write("| {} | {} | {} |\n".format(
+            o.write("| {} | {} | {} | {} |\n".format(
                 tstart,
                 tend,
+                location_link,
                 link)
             )
 

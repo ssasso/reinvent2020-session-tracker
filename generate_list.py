@@ -31,6 +31,7 @@ with open("./output/%s.md" % FILE_VERSION, 'w') as o:
         s=sessions[name]
         o.write("## {}\n".format(name))
         o.write("**TAGS**: {}\n".format(s[0]['tags']))
+        o.write("```\n{}\n```\n".format(s[0]['description']))
         o.write("\n")
 
 

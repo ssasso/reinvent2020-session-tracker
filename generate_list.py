@@ -5,6 +5,7 @@ FILE_VERSION="20201120"
 
 # Real code for real men starts here.
 import json
+from datetime import datetime
 import re
 
 def cleanhtml(raw_html):
@@ -42,7 +43,11 @@ with open("./output/%s.md" % FILE_VERSION, 'w') as o:
         o.write("| Start | End | G Calendar |\n")
         o.write("|-------|-----|------------|\n")
         for det in s:
-            o.write("| {} | {} | {} |\n".format(det['schedulingData']['start']['timestamp'], det['schedulingData']['end']['timestamp'], ''))
+            o.write("| {} | {} | {} |\n".format(
+                datetime.fromtimestamp(det['schedulingData']['start']['timestamp']),
+                datetime.fromtimestamp(det['schedulingData']['end']['timestamp']),
+                '')
+            )
 
 
 

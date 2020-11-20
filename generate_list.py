@@ -30,7 +30,7 @@ with open("./output/%s.md" % FILE_VERSION, 'w') as o:
     for name in sorted(sessions.keys()):
         s=sessions[name]
         o.write("## {}\n".format(name))
-        o.write("*TAGS*: {}\n".format(s[0]['tags']))
+        o.write("**TAGS**: {}\n".format(s[0]['tags']))
         o.write("\n")
 
 

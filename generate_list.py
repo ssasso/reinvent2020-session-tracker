@@ -47,7 +47,7 @@ with open("./output/%s.md" % FILE_VERSION, 'w') as o:
             tend = datetime.fromtimestamp(det['schedulingData']['end']['timestamp'])
             tzstart = tstart.strftime("%Y%m%dT%H%M%SZ")
             tzend = tend.strftime("%Y%m%dT%H%M%SZ")
-            calname = "re:Invent 2020 - {}".format(name)
+            calname = "re:Invent 2020 - {}".format(name).replace(" ", "+")
             url = "https://www.google.com/calendar/render?action=TEMPLATE&text={}&dates={}%2F{}".format(calname, tzstart, tzend)
             link = "[G_CAL]({})".format(url)
             o.write("| {} | {} | {} |\n".format(

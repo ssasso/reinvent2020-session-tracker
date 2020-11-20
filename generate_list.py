@@ -40,8 +40,8 @@ with open("./output/%s.md" % FILE_VERSION, 'w') as o:
         o.write("**TAGS**: {}\n".format(s[0]['tags']))
         o.write("\n{}\n".format(cleanhtml(s[0]['description'])))
         o.write("\n")
-        o.write("| Start | End | G Calendar |\n")
-        o.write("|-------|-----|------------|\n")
+        o.write("| Start (UTC) | End (UTC) | G Calendar |\n")
+        o.write("|-------------|-----------|------------|\n")
         for det in s:
             tstart = datetime.fromtimestamp(det['schedulingData']['start']['timestamp'])
             tend = datetime.fromtimestamp(det['schedulingData']['end']['timestamp'])

@@ -11,6 +11,8 @@ from datetime import datetime
 import re
 import sys
 
+languages = ['Spanish', 'French', 'Chinese', 'Japanese', 'Korean', 'Italian', 'Portuguese']
+
 def cleanhtml(raw_html):
     cleanr = re.compile('<.*?>')
     cleantext = re.sub(cleanr, '', raw_html)
@@ -61,6 +63,8 @@ for sessions in sess_split:
         o.write("# re:Invent 2020 - Session List\n\n")
         for name in sorted(sessions.keys()):
             s=sessions[name]
+            if s[0]['tags'].split(",")[0] in languages:
+                continue
             o.write("## {}\n".format(name))
             o.write("**TAGS**: {}\n".format(s[0]['tags']))
             o.write("\n{}\n".format(cleanhtml(s[0]['description'])))

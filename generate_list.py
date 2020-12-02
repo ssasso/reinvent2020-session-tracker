@@ -1,13 +1,14 @@
 #!/usr/bin/python3
 
 # Read file input/xxx.json, generate file output/xxx.md
-FILE_VERSION="20201125"
+FILE_VERSION="20201202"
 
 ## TODO: Output by_name, by_tag
 
 # Real code for real men starts here.
 import json
 from datetime import datetime
+import pytz
 import re
 import sys
 
@@ -15,7 +16,7 @@ languages = ['Spanish', 'French', 'Chinese', 'Japanese', 'Korean', 'Italian', 'P
 
 def cleanhtml(raw_html):
     cleanr = re.compile('<.*?>')
-    cleantext = re.sub(cleanr, '', raw_html)
+    cleantext = re.sub(cleanr, '', raw_html.encode('utf-8'))
     return cleantext
 
 data = {}
@@ -55,6 +56,8 @@ for name in session_names:
     sess_split[pg_idx][name] = sessions[name]
     i = i + 1
 
+localtz = pytz.timezone("Europe/Rome")
+
 i = 0
 for sessions in sess_split:
     # Start generating MD output
@@ -65,18 +68,18 @@ for sessions in sess_split:
             s=sessions[name]
             if s[0]['tags'].split(",")[0] in languages:
                 continue
-            o.write("## {}\n".format(name))
+            o.write("## {}\n".format(name.encode('utf-8')))
             o.write("**TAGS**: {}\n".format(s[0]['tags']))
             o.write("\n{}\n".format(cleanhtml(s[0]['description'])))
             o.write("\n")
             o.write("| Start (UTC) | End (UTC) | Location | G Calendar |\n")
             o.write("|-------------|-----------|----------|------------|\n")
             for det in s:
-                tstart = datetime.fromtimestamp(det['schedulingData']['start']['timestamp'])
-                tend = datetime.fromtimestamp(det['schedulingData']['end']['timestamp'])
+                tstart = localtz.localize(datetime.fromtimestamp(det['schedulingData']['start']['timestamp']), is_dst=None).astimezone(pytz.utc)
+                tend = localtz.localize(datetime.fromtimestamp(det['schedulingData']['end']['timestamp']), is_dst=None).astimezone(pytz.utc)
                 tzstart = tstart.strftime("%Y%m%dT%H%M%SZ")
                 tzend = tend.strftime("%Y%m%dT%H%M%SZ")
-                calname = "re:Invent 2020 - {}".format(name).replace(" ", "+")
+                calname = "re:Invent 2020 - {}".format(name.encode('utf-8')).replace(" ", "+")
                 location = "https://virtual.awsevents.com/media/{}".format(det['id'])
                 location_link = "[{}]({})".format(det['id'], location)
                 url = "https://www.google.com/calendar/render?action=TEMPLATE&text={}&location={}&dates={}%2F{}".format(calname, location, tzstart, tzend)
@@ -89,35 +92,3 @@ for sessions in sess_split:
                 )
     i = i + 1
 
-
-"""
-    {
-      "id": "1_3hvbfhan",
-      "name": "Come architettare una soluzione di rendering 3D a basso costo con istanze spot (caso d'uso: Ferrari)",
-      "description": "<div><div><div>In questa sessione parleremo dei benefici tecnologici ed economici legati all’utilizzo di servizi AWS per la gestione di applicazioni di rendering 3D. Ferrari racconterà come ha costruito un servizio efficiente di rendering, utilizzando le istanze GPU di ultima generazione e creando una modalità dinamica di assegnazione delle risorse basato su istanze di tipo Spot.</div></div></div>",
-      "type": "7",
-      "updatedAt": 1605769250,
-      "thumbnailUrl": "https://cfvod.kaltura.com/p/3047232/sp/304723200/thumbnail/entry_id/1_3hvbfhan/version/100001/width/379/height/213/type/3",
-      "tags": "Italian,Manufacturing,Architecture,Enterprise/Migration,Automotive,Compute,Session",
-      "mediaType": 201,
-      "duration": 0,
-      "recordedEntryId": null,
-      "schedulingData": {
-        "start": {
-          "timestamp": 1606798800,
-          "timeZoneName": "US/Pacific",
-          "timeZoneOffset": -28800
-        },
-        "end": {
-          "timestamp": 1606800600,
-          "timeZoneName": "US/Pacific",
-          "timeZoneOffset": -28800
-        }
-      },
-      "presenters": [],
-      "stats": [],
-      "hiddenTags": "__italian,amazon elastic compute cloud (amazon ec2),amazon cloudfront,amazon simple storage service (amazon s3)",
-      "callToActionLink": ""
-    },
-"""
-## G Calendar: https://www.google.com/calendar/render?action=TEMPLATE&text=a&details=aa&location=bb&dates=20201026T133300Z%2F20201111T133300Z
